@@ -30,6 +30,7 @@ class ViewController: UIViewController {
         self.randomNumberOne = Int.random(in: 1...99)
         self.randomNumberTwo = Int.random(in: 1...99)
         self.playSound()
+        self.addSnowflakes()
 
     }
 
@@ -139,5 +140,33 @@ class ViewController: UIViewController {
             print(error.localizedDescription)
         }
     }
+
+    func addSnowflakes() {
+        let flakeEmitterCell = CAEmitterCell()
+        flakeEmitterCell.contents = UIImage(named: "snowflake")?.cgImage
+        flakeEmitterCell.scale = 0.05
+        flakeEmitterCell.scaleRange = 0.1
+        flakeEmitterCell.scaleRange = .pi
+        flakeEmitterCell.lifetime = 20.0
+        flakeEmitterCell.birthRate = 30
+        flakeEmitterCell.velocity = -30
+        flakeEmitterCell.velocityRange = -20
+        flakeEmitterCell.yAcceleration = 10
+        flakeEmitterCell.xAcceleration = 1
+        flakeEmitterCell.spin = -0.1
+        flakeEmitterCell.spinRange = 1.0
+
+        let snowEmitterLayer = CAEmitterLayer()
+        snowEmitterLayer.emitterPosition = CGPoint(x: view.bounds.width / 2, y: -50)
+        snowEmitterLayer.emitterSize = CGSize(width: view.bounds.width, height: 0)
+        snowEmitterLayer.emitterShape = CAEmitterLayerEmitterShape.line
+        snowEmitterLayer.beginTime = CACurrentMediaTime()
+        snowEmitterLayer.timeOffset = 10
+        snowEmitterLayer.emitterCells = [flakeEmitterCell]
+
+        //add to layout
+        view.layer.addSublayer(snowEmitterLayer)
+    }
+
 }
 
