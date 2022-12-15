@@ -6,6 +6,9 @@
 //
 
 import UIKit
+import AVFoundation
+
+var player: AVAudioPlayer?
 
 class ViewController: UIViewController {
 
@@ -15,7 +18,7 @@ class ViewController: UIViewController {
     var randomOperator  = 0
     var randomNumberOne = 0
     var randomNumberTwo = 0
-    var answer:Int = 0
+    var answer:String = "Total"
 
     @IBOutlet weak var lblOperator: UILabel!
     @IBOutlet weak var lblAnswer: UILabel!
@@ -26,6 +29,7 @@ class ViewController: UIViewController {
         self.randomOperator = Int.random(in: 0..<4)
         self.randomNumberOne = Int.random(in: 1...99)
         self.randomNumberTwo = Int.random(in: 1...99)
+        self.playSound()
 
     }
 
@@ -55,18 +59,20 @@ class ViewController: UIViewController {
 
         switch randomOperator {
         case 0 :
-            answer = firstDigit + secondDigit
+            answer = String(firstDigit + secondDigit)
         case 1 :
             if firstDigit >= secondDigit{
-                answer = firstDigit - secondDigit
+                answer = String(firstDigit - secondDigit)
             } else {
-                self.alertController()
+                self.alertController(firstNum: firstDigit, secondNum: secondDigit)
+                answer = String(firstDigit - secondDigit)
+                displaySoundsAlert()
             }
 
         case 2 :
-            answer = firstDigit * secondDigit
+            answer = String(firstDigit * secondDigit)
         case 3 :
-            answer = firstDigit / secondDigit
+            answer = String(firstDigit / secondDigit)
         default:
             print()
         }
@@ -86,19 +92,52 @@ class ViewController: UIViewController {
         self.present(alert, animated: true, completion: nil)
     }
 
-    func alertController() {
-        let deleteAlert = UIAlertController(title: "Unfollow", message: "", preferredStyle: UIAlertController.Style.actionSheet)
+    func alertController(firstNum:Int,secondNum:Int) {
+        let deleteAlert = UIAlertController(title: "Oops", message: "\(firstNum) cannot be subtracted by \(secondNum), Because \(firstNum) is greater that \(secondNum) ", preferredStyle: UIAlertController.Style.actionSheet)
 
-            let unfollowAction = UIAlertAction(title: "Unfollow", style: .destructive) { (action: UIAlertAction) in
-                // Code to unfollow
-            }
+//            let unfollowAction = UIAlertAction(title: "Unfollow", style: .destructive) { (action: UIAlertAction) in
+//                // Code to unfollow
+//            }
 
-            //let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            let cancelAction = UIAlertAction(title: "Ok!", style: .cancel, handler: nil)
 
-            deleteAlert.addAction(unfollowAction)
-            //deleteAlert.addAction(cancelAction)
+           // deleteAlert.addAction(unfollowAction)
+            deleteAlert.addAction(cancelAction)
             self.present(deleteAlert, animated: true, completion: nil)
     }
 
+    func displaySoundsAlert() {
+        let alert = UIAlertController(title: "Play Sound", message: nil, preferredStyle: UIAlertController.Style.alert)
+        for i in 1000...1010 {
+            alert.addAction(UIAlertAction(title: "\(i)", style: .default, handler: {_ in
+                AudioServicesPlayAlertSound(UInt32(i))
+                self.displaySoundsAlert()
+            }))
+        }
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+
+    func playSound() {
+        guard let url = Bundle.main.url(forResource: "JingleBells", withExtension: "mp3") else { return }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            /* The following line is required for the player to work on iOS 11. Change the file type accordingly*/
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
+
+            /* iOS 10 and earlier require the following line:
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileTypeMPEGLayer3) */
+
+            guard let player = player else { return }
+
+            player.play()
+
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
 }
 
